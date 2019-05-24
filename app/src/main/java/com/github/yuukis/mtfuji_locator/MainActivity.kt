@@ -3,6 +3,10 @@ package com.github.yuukis.mtfuji_locator
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
@@ -16,19 +20,22 @@ import permissions.dispatcher.RuntimePermissions
 import kotlin.math.*
 
 @RuntimePermissions
-class MainActivity : AppCompatActivity(), LocationListener {
+class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener {
 
     companion object {
         val MTFUJI_LOCATION = arrayOf(35.360496, 138.727284)
     }
 
     var locationManager: LocationManager? = null
+    var sensorManager: SensorManager? = null
     var bestProvider: String? = null
     var currentLocation: Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
 
     @SuppressLint("NoDelegateOnResumeDetector")
@@ -36,12 +43,17 @@ class MainActivity : AppCompatActivity(), LocationListener {
         super.onResume()
 
         startUpdatingLocationWithPermissionCheck()
+        sensorManager?.let { manager ->
+            val sensor = manager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
+            manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        }
     }
 
     override fun onPause() {
         super.onPause()
 
         stopUpdatingLocation()
+        sensorManager?.unregisterListener(this)
     }
 
     fun initLocationManager() {
@@ -94,6 +106,19 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     override fun onProviderDisabled(provider: String?) {
         //
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        //
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        event?.let {
+            if (it.sensor.type == Sensor.TYPE_ORIENTATION) {
+                val sensorAzimuth = it.values[0]
+                Log.d("onSensorChanged", "Azimuth: $sensorAzimuth")
+            }
+        }
     }
 
     fun showResult(distance: Float, azimuth: Float) {
