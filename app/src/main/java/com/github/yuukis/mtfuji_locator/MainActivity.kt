@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     var bestProvider: String? = null
     var currentLocation: Location? = null
     var distanceToMtFuji: Float = 0f
-    var azimuthToMtFuji: Float = 0f
-    var azimuthBySensor: Float = 0f
+    var azimuthToMtFuji: Int = 0
+    var azimuthBySensor: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,13 +128,13 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
         }
     }
 
-    fun showResult(distance: Float, azimuth: Float, sensorAzimuth: Float) {
+    fun showResult(distance: Float, azimuth: Int, sensorAzimuth: Int) {
         val textView = findViewById<TextView>(R.id.text1)
-        val distanceKm = (distance / 1000).toInt()
+        val distanceKm = (distance / 1000)
         textView.text = """
 DST: $distanceKm KM
-AZ: ${azimuth.toInt()}
-SENSOR_AZ ${sensorAzimuth.toInt()}
+AZ: $azimuth
+SENSOR_AZ $sensorAzimuth
 """
     }
 
@@ -146,13 +146,19 @@ SENSOR_AZ ${sensorAzimuth.toInt()}
         return d.toFloat()
     }
 
-    private fun calcAzimuth(x0: Float, y0: Float): Float {
+    private fun calcAzimuth(x0: Float, y0: Float): Int {
         val (y, x) = MTFUJI_LOCATION
         val rad = 180/PI
-        var a = atan2(sin((x - x0)/rad), cos(y0/rad)*tan(y/rad) - sin(y0/rad)*cos((x - x0)/rad))*rad
-        if (a < 0) {
-            a += 360
-        }
-        return a.toFloat()
+        val a = atan2(sin((x - x0)/rad), cos(y0/rad)*tan(y/rad) - sin(y0/rad)*cos((x - x0)/rad))
+        return rad2deg(a)
+    }
+
+    private fun rad2deg(angrad: Double): Int {
+        return Math.floor(
+            if (angrad >= 0)
+                Math.toDegrees(angrad)
+            else
+                360 + Math.toDegrees(angrad)
+        ).toInt()
     }
 }
