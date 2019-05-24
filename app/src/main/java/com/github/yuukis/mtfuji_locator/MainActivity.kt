@@ -33,6 +33,8 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     var distanceToMtFuji: Float = 0f
     var azimuthToMtFuji: Int = 0
     var azimuthBySensor: Int = 0
+    var accelerometerValues: FloatArray? = null
+    var magneticFieldValues: FloatArray? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,8 +49,9 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
 
         startUpdatingLocationWithPermissionCheck()
         sensorManager?.let { manager ->
-            val sensor = manager.getDefaultSensor(Sensor.TYPE_ORIENTATION)
-            manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+            val delay = SensorManager.SENSOR_DELAY_UI
+            manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), delay)
+            manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), delay)
         }
     }
 
@@ -120,9 +123,24 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
-            if (it.sensor.type == Sensor.TYPE_ORIENTATION) {
-                val azimuth = it.values[0]
-                azimuthBySensor = azimuth
+            when (it.sensor.type) {
+                Sensor.TYPE_ACCELEROMETER -> {
+                    accelerometerValues = it.values.clone()
+                }
+                Sensor.TYPE_MAGNETIC_FIELD -> {
+                    magneticFieldValues = it.values.clone()
+                }
+                else -> return
+            }
+            if (accelerometerValues != null && magneticFieldValues != null) {
+                val rotationMatrix = FloatArray(16)
+                val inclinationMatrix = FloatArray(16)
+                val remapedMatrix = FloatArray(16)
+                val orientationValues = FloatArray(3)
+                SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix, accelerometerValues, magneticFieldValues)
+                SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, remapedMatrix)
+                SensorManager.getOrientation(remapedMatrix, orientationValues)
+                azimuthBySensor = rad2deg(orientationValues[0].toDouble())
                 showResult(distanceToMtFuji, azimuthToMtFuji, azimuthBySensor)
             }
         }
