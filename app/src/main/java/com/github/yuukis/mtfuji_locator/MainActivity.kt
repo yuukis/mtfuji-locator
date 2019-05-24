@@ -147,13 +147,21 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     }
 
     fun showResult(distance: Float, azimuth: Int, sensorAzimuth: Int) {
+        val emojiView = findViewById<TextView>(R.id.emoji)
         val textView = findViewById<TextView>(R.id.text1)
-        val distanceKm = (distance / 1000)
-        textView.text = """
-DST: $distanceKm KM
-AZ: $azimuth
-SENSOR_AZ $sensorAzimuth
-"""
+        var azimuthDelta = sensorAzimuth - azimuth
+        if (azimuthDelta < -180) {
+            azimuthDelta += 360
+        } else if (azimuthDelta >= 180) {
+            azimuthDelta -= 360
+        }
+        val distanceKm = (distance / 1000).toInt()
+        emojiView.text = when {
+            azimuthDelta < -15 -> "➡️"
+            azimuthDelta > 15 -> "⬅️"
+            else -> "🗻"
+        }
+        textView.text = "${distanceKm.toString()} km"
     }
 
     private fun calcDistance(x0: Float, y0: Float): Float {
