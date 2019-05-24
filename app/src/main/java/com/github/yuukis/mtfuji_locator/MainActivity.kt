@@ -10,6 +10,7 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.RuntimePermissions
 import kotlin.math.*
@@ -78,9 +79,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
             val lng = it.longitude.toFloat()
 
             val dist = calcDistance(lng, lat)
-            Log.d("Distance", dist.toString())
             val azim = calcAzimuth(lng, lat)
-            Log.d("Azimuth", azim.toString())
+            showResult(dist, azim)
         }
     }
 
@@ -94,6 +94,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     override fun onProviderDisabled(provider: String?) {
         //
+    }
+
+    fun showResult(distance: Float, azimuth: Float) {
+        val textView = findViewById<TextView>(R.id.text1)
+        val distanceKm = (distance / 1000).toInt()
+        textView.text = "DST: $distanceKm KM\nAZ: ${azimuth.toInt()}"
     }
 
     private fun calcDistance(x0: Float, y0: Float): Float {
