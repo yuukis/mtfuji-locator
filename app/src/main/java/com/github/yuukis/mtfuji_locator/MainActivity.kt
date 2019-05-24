@@ -30,6 +30,9 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     var sensorManager: SensorManager? = null
     var bestProvider: String? = null
     var currentLocation: Location? = null
+    var distanceToMtFuji: Float = 0f
+    var azimuthToMtFuji: Float = 0f
+    var azimuthBySensor: Float = 0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +95,10 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
 
             val dist = calcDistance(lng, lat)
             val azim = calcAzimuth(lng, lat)
-            showResult(dist, azim)
+
+            distanceToMtFuji = dist
+            azimuthToMtFuji = azim
+            showResult(distanceToMtFuji, azimuthToMtFuji, azimuthBySensor)
         }
     }
 
@@ -115,16 +121,21 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             if (it.sensor.type == Sensor.TYPE_ORIENTATION) {
-                val sensorAzimuth = it.values[0]
-                Log.d("onSensorChanged", "Azimuth: $sensorAzimuth")
+                val azimuth = it.values[0]
+                azimuthBySensor = azimuth
+                showResult(distanceToMtFuji, azimuthToMtFuji, azimuthBySensor)
             }
         }
     }
 
-    fun showResult(distance: Float, azimuth: Float) {
+    fun showResult(distance: Float, azimuth: Float, sensorAzimuth: Float) {
         val textView = findViewById<TextView>(R.id.text1)
         val distanceKm = (distance / 1000).toInt()
-        textView.text = "DST: $distanceKm KM\nAZ: ${azimuth.toInt()}"
+        textView.text = """
+DST: $distanceKm KM
+AZ: ${azimuth.toInt()}
+SENSOR_AZ ${sensorAzimuth.toInt()}
+"""
     }
 
     private fun calcDistance(x0: Float, y0: Float): Float {
