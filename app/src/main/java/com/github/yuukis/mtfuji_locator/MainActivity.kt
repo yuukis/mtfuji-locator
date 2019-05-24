@@ -12,9 +12,7 @@ import android.os.Bundle
 import android.util.Log
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.RuntimePermissions
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 @RuntimePermissions
 class MainActivity : AppCompatActivity(), LocationListener {
@@ -81,6 +79,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
             val dist = calcDistance(lng, lat)
             Log.d("Distance", dist.toString())
+            val azim = calcAzimuth(lng, lat)
+            Log.d("Azimuth", azim.toString())
         }
     }
 
@@ -104,4 +104,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
         return d.toFloat()
     }
 
+    private fun calcAzimuth(x0: Float, y0: Float): Float {
+        val (y, x) = MTFUJI_LOCATION
+        val rad = 180/PI
+        var a = atan2(sin((x - x0)/rad), cos(y0/rad)*tan(y/rad) - sin(y0/rad)*cos((x - x0)/rad))*rad
+        if (a < 0) {
+            a += 360
+        }
+        return a.toFloat()
+    }
 }
