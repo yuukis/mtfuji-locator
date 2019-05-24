@@ -12,9 +12,16 @@ import android.os.Bundle
 import android.util.Log
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.RuntimePermissions
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sin
 
 @RuntimePermissions
 class MainActivity : AppCompatActivity(), LocationListener {
+
+    companion object {
+        val MTFUJI_LOCATION = arrayOf(35.360496, 138.727284)
+    }
 
     var locationManager: LocationManager? = null
     var bestProvider: String? = null
@@ -68,6 +75,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
         Log.d("onLocationChanged", "${location?.toString()}")
 
         currentLocation = location
+        location?.let {
+            val lat = it.latitude.toFloat()
+            val lng = it.longitude.toFloat()
+
+            val dist = calcDistance(lng, lat)
+            Log.d("Distance", dist.toString())
+        }
     }
 
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
@@ -80,6 +94,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     override fun onProviderDisabled(provider: String?) {
         //
+    }
+
+    private fun calcDistance(x0: Float, y0: Float): Float {
+        val (y, x) = MTFUJI_LOCATION
+        val r = 6378.137 * 1000
+        val rad = 180/PI
+        val d = r * acos(sin(y0/rad)*sin(y/rad) + cos(y0/rad)*cos(y/rad)*cos((x - x0)/rad))
+        return d.toFloat()
     }
 
 }
