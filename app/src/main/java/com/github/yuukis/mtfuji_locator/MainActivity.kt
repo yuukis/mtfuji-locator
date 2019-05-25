@@ -160,8 +160,8 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
         }
         val distanceKm = (distance / 1000).toInt()
         emojiView.text = when {
-            azimuthDelta < -15 -> "➡️"
-            azimuthDelta > 15 -> "⬅️"
+            azimuthDelta < -15 -> "→"
+            azimuthDelta > 15 -> "←"
             else -> "🗻"
         }
         textView.text = getString(R.string.message_distance, distanceKm)
