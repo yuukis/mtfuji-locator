@@ -30,9 +30,9 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     var sensorManager: SensorManager? = null
     var bestProvider: String? = null
     var currentLocation: Location? = null
-    var distanceToMtFuji: Float = 0f
-    var azimuthToMtFuji: Int = 0
-    var azimuthBySensor: Int = 0
+    var distanceToMtFuji: Float? = null
+    var azimuthToMtFuji: Int? = null
+    var azimuthBySensor: Int? = null
     var accelerometerValues: FloatArray? = null
     var magneticFieldValues: FloatArray? = null
 
@@ -146,14 +146,23 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
         }
     }
 
-    fun showResult(distance: Float, azimuth: Int, sensorAzimuth: Int) {
+    fun showResult(distance: Float?, azimuth: Int?, sensorAzimuth: Int?) {
+        if (distance == null || azimuth == null || sensorAzimuth == null) return
+        val emojiView = findViewById<TextView>(R.id.emoji)
         val textView = findViewById<TextView>(R.id.text1)
-        val distanceKm = (distance / 1000)
-        textView.text = """
-DST: $distanceKm KM
-AZ: $azimuth
-SENSOR_AZ $sensorAzimuth
-"""
+        var azimuthDelta = sensorAzimuth - azimuth
+        if (azimuthDelta < -180) {
+            azimuthDelta += 360
+        } else if (azimuthDelta >= 180) {
+            azimuthDelta -= 360
+        }
+        val distanceKm = (distance / 1000).toInt()
+        emojiView.text = when {
+            azimuthDelta < -15 -> "➡️"
+            azimuthDelta > 15 -> "⬅️"
+            else -> "🗻"
+        }
+        textView.text = "${distanceKm} km"
     }
 
     private fun calcDistance(x0: Float, y0: Float): Float {
