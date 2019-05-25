@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
             azimuthDelta > 15 -> "⬅️"
             else -> "🗻"
         }
-        textView.text = "${distanceKm} km"
+        textView.text = getString(R.string.message_distance, distanceKm)
     }
 
     private fun calcDistance(x0: Float, y0: Float): Float {

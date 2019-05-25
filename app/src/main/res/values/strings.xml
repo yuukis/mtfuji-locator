@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mt.Fuji Locator</string>
+    <string name="message_distance">%1$dkm to Mt.Fuji</string>
 </resources>
