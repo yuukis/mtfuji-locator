@@ -14,6 +14,7 @@ import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import android.widget.TextView
 import permissions.dispatcher.NeedsPermission
 import permissions.dispatcher.RuntimePermissions
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
 
         startUpdatingLocationWithPermissionCheck()
         sensorManager?.let { manager ->
-            val delay = SensorManager.SENSOR_DELAY_UI
+            val delay = SensorManager.SENSOR_DELAY_NORMAL
             manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), delay)
             manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), delay)
         }
@@ -147,6 +149,9 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     }
 
     fun showResult(distance: Float?, azimuth: Int?, sensorAzimuth: Int?) {
+        if (sensorAzimuth != null) {
+            findViewById<TextView>(R.id.text2).text = "$sensorAzimuth°"
+        }
         if (distance == null || azimuth == null || sensorAzimuth == null) return
         val emojiView = findViewById<TextView>(R.id.emoji)
         val textView = findViewById<TextView>(R.id.text1)
@@ -158,11 +163,11 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
         }
         val distanceKm = (distance / 1000).toInt()
         emojiView.text = when {
-            azimuthDelta < -15 -> "➡️"
-            azimuthDelta > 15 -> "⬅️"
+            azimuthDelta < -15 -> "→"
+            azimuthDelta > 15 -> "←"
             else -> "🗻"
         }
-        textView.text = "${distanceKm} km"
+        textView.text = getString(R.string.message_distance, distanceKm)
     }
 
     private fun calcDistance(x0: Float, y0: Float): Float {
