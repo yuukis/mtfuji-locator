@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
 
         startUpdatingLocationWithPermissionCheck()
         sensorManager?.let { manager ->
-            val delay = SensorManager.SENSOR_DELAY_UI
+            val delay = SensorManager.SENSOR_DELAY_NORMAL
             manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), delay)
             manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), delay)
         }
