@@ -149,6 +149,9 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener 
     }
 
     fun showResult(distance: Float?, azimuth: Int?, sensorAzimuth: Int?) {
+        if (sensorAzimuth != null) {
+            findViewById<TextView>(R.id.text2).text = "$sensorAzimuth°"
+        }
         if (distance == null || azimuth == null || sensorAzimuth == null) return
         val emojiView = findViewById<TextView>(R.id.emoji)
         val textView = findViewById<TextView>(R.id.text1)
